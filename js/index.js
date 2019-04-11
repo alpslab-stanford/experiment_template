@@ -2,10 +2,10 @@ function make_slides(f) {
   var   slides = {};
 
   slides.i0 = slide({
-     name : "i0",
-     start: function() {
-      exp.startT = Date.now();
-     }
+    name : "i0",
+    start: function() {
+    exp.startT = Date.now();
+    }
   });
 
   slides.instructions = slide({
@@ -17,29 +17,12 @@ function make_slides(f) {
 
   slides.one_slider = slide({
     name : "one_slider",
-
-    /* trial information for this block
-     (the variable 'stim' will change between each of these values,
-      and for each of these, present_handle will be run.) */
-    present :_.shuffle([
-      {item: "horse", condition: "ambiguous", sentence: "The horse raced past the barn fell."},
-      {item: "horse", condition: "unambiguous", sentence: "The horse that raced past the barn fell."},
-      {item: "practice", condition: "ambiguous", sentence: "practice1"},
-      {item: "practice", condition: "unambiguous", sentence: "practice2"},
-    ]),
-
-    /* It might be the case that the array of things you want to present depends
-    on the condition. A solution is to define the array when the condition
-    is determined, e.g., in init().*/
-    // present: _.shuffle(exp.conditionalStims),
-
-    //this gets run only at the beginning of the block
+    present: exp.stims, //every element in exp.stims is passed to present_handle one by one as 'stim'
+    
     present_handle : function(stim) {
       $(".err").hide();
-
-      //console.log(exp.condition)
-     
-      this.stim = stim; //I like to store this information in the slide so I can record it later.
+    
+      this.stim = stim; // store this information in the slide so you can record it later
       $(".prompt").html(stim.sentence);
 
       this.init_sliders();
@@ -50,11 +33,11 @@ function make_slides(f) {
       if (exp.sliderPost == null) {
         $(".err").show();
       } else {
-        this.log_responses();
+      this.log_responses();
 
-        /* use _stream.apply(this); if and only if there is
-        "present" data. (and only *after* responses are logged) */
-        _stream.apply(this);
+      /* use _stream.apply(this); if and only if there is
+      "present" data. (and only *after* responses are logged) */
+      _stream.apply(this);
       }
     },
 
@@ -65,11 +48,11 @@ function make_slides(f) {
     },
 
     log_responses : function() {
-      exp.data_trials.push({
-        "item" : this.stim.item,
-        "condition": this.stim.condition,
+    exp.data_trials.push({
+        "stim" : this.stim.sentence,
         "response" : exp.sliderPost
-      });
+    });
+
     }
   });
 
@@ -113,19 +96,12 @@ function make_slides(f) {
 function init() {
   exp.trials = [];
   exp.catch_trials = [];
-  exp.condition = _.sample(["condition 1", "condition 2"]); //can randomize between subject conditions here
 
-  // exp.conditionalStims = {"condition 1": [item: "horse", condition: "ambiguous", sentence: "The horse raced past the barn fell.",
-  //                                       item: "horse", condition: "unambiguous", sentence: "The horse that raced past the barn fell."],
-  //                         "condition 2": [item: "practice", condition: "ambiguous", sentence: "practice1",
-  //                                       item: "practice", condition: "unambiguous", sentence: "practice2"]
-  //                 }[exp.condition];
+  //exp.condition = _.sample(["condition1", "condition2"]);
 
-  // exp.conditionalStims = {"condition 1": ["The horse raced past the barn fell.",
-  //                                         "The horse that raced past the barn fell."],
-  //                         "condition 2": ["practice1",
-  //                                         "practice2"]
-  //                         }[exp.condition];
+  exp.stims =  [    
+    {sentence: "The horse raced past the barn fell."}, 
+  ];
 
   exp.system = {
       Browser : BrowserDetect.browser,
@@ -135,9 +111,9 @@ function init() {
       screenW: screen.width,
       screenUW: exp.width
     };
+
   //blocks of the experiment:
   exp.structure=["i0", "instructions", "one_slider", 'subj_info', 'thanks'];
-  // exp.structure=["i0", "instructions", "single_trial", "one_slider", 'subj_info', 'thanks'];
 
   exp.data_trials = [];
   //make corresponding slides:
